@@ -21,42 +21,55 @@ function boardDataToString(boardData: BoardData): string {
 }
 
 function printBoard(board: PuzzleBoard): string {
-    let boardString = "";
+    let boardString = "\n";
     
     for(let y = 0; y < board.height; y++) {
         for(let x = 0; x < board.width; x++) {
             const boardData = board.boardDatas[y][x];
-            boardString += `| ${boardData.shape ?? '-'} |`;
+            boardString += `| ${boardData.placeable == false ? 'x' : boardData.shape?.type ?? '-'} |`;
         }
 
         boardString += "\n";
     }
 
+    boardString += "\n";
+
     return boardString;
 }
 
-export function testCalculate() {
+export function testCalculate(): string {
     
     let boardDatas: BoardData[][] = [];
 
-    for(let w = 0; w < 2; w++) {
-        for(let h = 0; h < 2; h++) {
-            const boardData: BoardData = { placeable: true, coordinates: { row: w, column: h }, toString: boardDataToString };
-            boardDatas[w][h] = boardData;
+    for(let y = 0; y < 4; y++) {
+        for(let x = 0; x < 5; x++) {
+            const boardData: BoardData = { placeable: true, coordinates: { row: y, column: x }, toString: boardDataToString };
+            
+            if(!boardDatas[y])
+                boardDatas[y] = [];
+
+            boardDatas[y][x] = boardData;
         }
     }
+
+    boardDatas[0][3].placeable = false;
+    boardDatas[1][3].placeable = false;
+    boardDatas[3][3].placeable = false;
+    boardDatas[3][4].placeable = false;
     
     const board: PuzzleBoard = {
-        width: 2,
-        height: 2,
+        width: 5,
+        height: 4,
         boardDatas: boardDatas,
         toString: boardToString
     };
+    
+    console.log(printBoard(board));
 
     const currentCoordinates = board.boardDatas[0][0].coordinates;
     const calculatedBoard = calculatePuzzle(currentCoordinates, board);
 
-    console.log(printBoard(calculatedBoard));
+    return printBoard(calculatedBoard);
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard): PuzzleBoard {
@@ -78,6 +91,8 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
             }
             else {
                 newBoard = placeShape(coordinates, currentShape, newBoard);
+
+                console.log(printBoard(newBoard));
 
                 const nearestNeighbor = checkNearestNeighbor(placeableCoordinates[0].coordinates, newBoard);
 
@@ -116,10 +131,12 @@ function checkNearestNeighbor(currentCoordinates: PuzzleCoordinates, board: Puzz
 }
 
 function checkIfPlaceable(coordinates: PuzzleCoordinates, board: PuzzleBoard): boolean {
+    //console.log(`checking if placeable x: ${coordinates.column}, y: ${coordinates.row}`)
+
     if(coordinates.column < 0 || coordinates.column >= board.width || coordinates.row < 0 || coordinates.row >= board.height)
         return false;
 
-    const boardData = board.boardDatas[coordinates.column][coordinates.row];
+    const boardData = board.boardDatas[coordinates.row][coordinates.column];
     return boardData.placeable && !boardData.shape;
 }
 
