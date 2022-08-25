@@ -2,16 +2,35 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import { useState } from 'react'
+import { PuzzleBoard } from '../models/models'
 import { testCalculate } from '../services/puzzleCalculator'
+import { drawPuzzleBoard } from '../services/puzzlePainter'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const [boardOutput, setBoardOutput] = useState<string>("Click calculate to test.");
 
   const calculate = () => {
-    const boardString = testCalculate();
-    setBoardOutput(boardString);
+    const board = testCalculate();
+    //setBoardOutput(boardString);
+
+    drawShape(board);
   }
+
+  const drawShape = (board: PuzzleBoard) => {
+            
+    // Get the canvas element using the DOM
+    var canvas = document.getElementById('mycanvas') as HTMLCanvasElement;
+
+    // Make sure we don't execute when canvas isn't supported
+    if (canvas.getContext) {
+       
+       // use getContext to use the canvas for drawing
+       var ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+       drawPuzzleBoard(board, ctx);
+    } else {
+       alert('You need Safari or Firefox 1.5+ to see this demo.');
+    }
+ }
 
   return (
     <div className={styles.container}>
@@ -28,9 +47,9 @@ const Home: NextPage = () => {
 
         <div style={{margin: 15, display: 'flex', flexDirection: 'column'}}>
           <button onClick={calculate}>Calculate</button>
-
-          <textarea cols={200} rows={15} value={boardOutput}></textarea>
         </div>
+
+        <canvas id="mycanvas" width="500" height="500" style={{border: '1px solid black'}}></canvas>
       </main>
 
       <footer className={styles.footer}>

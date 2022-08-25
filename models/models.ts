@@ -10,6 +10,8 @@ export interface BoardData {
     shape?: PuzzleShape;
     placeable: boolean;
     coordinates: PuzzleCoordinates;
+    
+    drawn?: boolean;
 
     toString: (boardData: BoardData) => string;
 }

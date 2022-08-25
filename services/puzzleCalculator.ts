@@ -37,7 +37,7 @@ function printBoard(board: PuzzleBoard): string {
     return boardString;
 }
 
-export function testCalculate(): string {
+export function testCalculate(): PuzzleBoard {
     
     let boardDatas: BoardData[][] = [];
 
@@ -69,7 +69,9 @@ export function testCalculate(): string {
     const currentCoordinates = board.boardDatas[0][0].coordinates;
     const calculatedBoard = calculatePuzzle(currentCoordinates, board);
 
-    return printBoard(calculatedBoard);
+    return calculatedBoard;
+
+    //return printBoard(calculatedBoard);
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard): PuzzleBoard {
@@ -156,7 +158,7 @@ function placeShape(coordinates: PuzzleCoordinates[], puzzleType: PuzzleType, bo
     const newBoard = {...board};
 
     coordinates.forEach(x => {
-        const puzzleShape: PuzzleShape = { type: puzzleType, linkedPuzzles: coordinates.filter(y => y.column != x.column && y.row != x.row) };
+        const puzzleShape: PuzzleShape = { type: puzzleType, linkedPuzzles: coordinates }; //coordinates.filter(y => y.column != x.column && y.row != x.row) };
         newBoard.boardDatas[x.row][x.column].shape = puzzleShape;
     });
 
