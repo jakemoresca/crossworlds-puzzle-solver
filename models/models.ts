@@ -3,6 +3,7 @@ export interface PuzzleBoard {
     height: number;
     boardDatas: BoardData[][];
 
+    finished?: boolean;
     toString: (board: PuzzleBoard) => string;
 }
 
@@ -22,11 +23,11 @@ export interface PuzzleShape {
 }
 
 export enum PuzzleType {
-    TShape = 0,
-    LShape = 1,
-    JShape = 2,
-    IShape = 3,
-    OShape = 4,
+    OShape = 0,
+    TShape = 1,
+    LShape = 2,
+    JShape = 3,
+    IShape = 4,    
     SShape = 5,
     ZShape = 6
 }

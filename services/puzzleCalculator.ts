@@ -75,7 +75,16 @@ export function testCalculate(): PuzzleBoard {
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard): PuzzleBoard {
-    var newBoard = {...board};
+    var newBoard = {...board, boardDatas: { 
+        ...board.boardDatas
+    }};
+
+    if(currentCoordinates.column == 0 && currentCoordinates.row == 0) {
+        const nearestNeighbor = checkNearestNeighbor(currentCoordinates, newBoard);
+        newBoard = calculatePuzzle(nearestNeighbor, newBoard);
+
+        return newBoard;
+    }
 
     for(let shapeCounter = 0; shapeCounter <= 6; shapeCounter++)
     {
@@ -84,9 +93,9 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
 
         const placeableCoordinates = puzzleShapeService.getPlaceableCoordinates(currentCoordinates, newBoard);
 
-        for(let x = 0; x <= placeableCoordinates.length; x++)
+        for(let x = 0; x < placeableCoordinates.length; x++)
         {
-            var coordinates = [placeableCoordinates[0].coordinates].concat(placeableCoordinates[0].shape?.linkedPuzzles ?? []);
+            var coordinates = [placeableCoordinates[x].coordinates].concat(placeableCoordinates[x].shape?.linkedPuzzles ?? []);
 
             if(coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
                 continue;
@@ -94,20 +103,34 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
             else {
                 newBoard = placeShape(coordinates, currentShape, newBoard);
 
+                console.log(`after placing:`)
                 console.log(printBoard(newBoard));
 
                 const nearestNeighbor = checkNearestNeighbor(placeableCoordinates[0].coordinates, newBoard);
 
+                console.log(`nearest neighbor is: x: ${nearestNeighbor.column}, y: ${nearestNeighbor.row}`)
+
                 if(nearestNeighbor.column == -1 && nearestNeighbor.row == -1) {
+                    console.log(`returning... no changes needed.`);
+                    newBoard.finished = true;
                     return newBoard;
                 }
 
                 const updatedBoard = calculatePuzzle(nearestNeighbor, newBoard);
 
-                if(updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard)) {
+                if(updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard) && !updatedBoard.finished) {
+                    console.log(`board was not changed.`)
+
+                    console.log(`before:`)
+                    console.log(printBoard(newBoard));
+
+                    console.log(`after:`)
+                    console.log(printBoard(updatedBoard));
+
                     newBoard = removeShape(coordinates, updatedBoard);
                 }
                 else {
+                    console.log(`board was changed.`)
                     return updatedBoard;
                 }
             }
@@ -124,8 +147,9 @@ function checkNearestNeighbor(currentCoordinates: PuzzleCoordinates, board: Puzz
         for (let x = startingColumn; x < board.width; x++) {
             const currentCoordinates: PuzzleCoordinates = {row: y, column: x};
             
-            if(checkIfPlaceable(currentCoordinates, board))
+            if(checkIfPlaceable(currentCoordinates, board)) {
                 return currentCoordinates;
+            }
         }
     }
 

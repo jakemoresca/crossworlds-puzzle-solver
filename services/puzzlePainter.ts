@@ -10,30 +10,46 @@ export function drawPuzzleBoard(board: PuzzleBoard, ctx: CanvasRenderingContext2
 
             const linkedCoordinates = [boardData.coordinates].concat(boardData.shape?.linkedPuzzles ?? []);
 
-            board = drawBlock(linkedCoordinates, ctx, board);
+            if (!boardData.shape && boardData.placeable) {
+                board = drawBlock(linkedCoordinates, ctx, board, '#ffffff');
+                drawCellGrid(boardData.coordinates, ctx, board);
+            }
+            else if (!boardData.placeable) {
+                board = drawBlock(linkedCoordinates, ctx, board, 'rgb(81, 139, 143)');
+                drawCellGrid(boardData.coordinates, ctx, board);
+            }
+            else {
+                board = drawBlock(linkedCoordinates, ctx, board);
+            }
         }
     }
 }
 
-function drawBlock(linkedCoordinates: PuzzleCoordinates[], ctx: CanvasRenderingContext2D, board: PuzzleBoard) {
+export function clearBoard(ctx: CanvasRenderingContext2D) {
+    ctx.clearRect(0, 0, 500, 500);
+}
+
+function drawBlock(linkedCoordinates: PuzzleCoordinates[], ctx: CanvasRenderingContext2D, board: PuzzleBoard, color?: string) {
     const [sat, lightness] = [.6, .8];
     const hue = Math.random();
 
-    const linkedColor = hslToRgb(hue, sat, lightness);
+    const linkedColor = color ?? hslToRgb(hue, sat, lightness);
 
-    if (linkedCoordinates.length == 1) {
-        ctx.fillStyle = '#808080';
-        ctx.fillRect(linkedCoordinates[0].column * 50, linkedCoordinates[0].row * 50, 50, 50);
-        board.boardDatas[linkedCoordinates[0].row][linkedCoordinates[0].column].drawn = true;
-    }
-    else {
-        linkedCoordinates.forEach(coordinates => {
-            ctx.fillStyle = linkedColor;
-            ctx.fillRect(coordinates.column * 50, coordinates.row * 50, 50, 50);
+    linkedCoordinates.forEach(coordinates => {
+        ctx.fillStyle = linkedColor;
+        ctx.fillRect(coordinates.column * 50, coordinates.row * 50, 50, 50);
 
-            board.boardDatas[coordinates.row][coordinates.column].drawn = true;
-        });
-    }
+        board.boardDatas[coordinates.row][coordinates.column].drawn = true;
+    });
+
+    return board;
+}
+
+function drawCellGrid(coordinates: PuzzleCoordinates, ctx: CanvasRenderingContext2D, board: PuzzleBoard) {
+    const linkedColor = '#000000';
+
+    ctx.fillStyle = linkedColor;
+    ctx.strokeRect(coordinates.column * 50, coordinates.row * 50, 50, 50);
 
     return board;
 }
