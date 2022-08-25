@@ -75,11 +75,10 @@ export function testCalculate(): PuzzleBoard {
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard): PuzzleBoard {
-    var newBoard = {...board, boardDatas: { 
-        ...board.boardDatas
-    }};
+    var newBoard = {...board};
 
-    if(currentCoordinates.column == 0 && currentCoordinates.row == 0) {
+    const boardData = board.boardDatas[currentCoordinates.row][currentCoordinates.column];
+    if(currentCoordinates.column == 0 && currentCoordinates.row == 0 && !boardData.placeable) {
         const nearestNeighbor = checkNearestNeighbor(currentCoordinates, newBoard);
         newBoard = calculatePuzzle(nearestNeighbor, newBoard);
 
