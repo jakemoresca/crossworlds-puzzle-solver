@@ -29,10 +29,16 @@ export enum PuzzleType {
     JShape = 3,
     IShape = 4,    
     SShape = 5,
-    ZShape = 6
+    ZShape = 6,
+    None = 7
 }
 
 export interface PuzzleCoordinates {
     row: number;
     column: number;
+}
+
+export interface PuzzleLimit {
+    limits: { [key: string]: number | undefined },
+    order: string[]
 }

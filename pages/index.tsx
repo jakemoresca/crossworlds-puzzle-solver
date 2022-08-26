@@ -1,8 +1,9 @@
-import { AppBar, Box, Button, Container, createTheme, CssBaseline, FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, ThemeProvider, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, Container, createTheme, CssBaseline, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, ThemeProvider, Toolbar, Typography } from '@mui/material'
+import { url } from 'inspector'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import { PuzzleBoard } from '../models/models'
+import { ChangeEvent, useEffect, useState } from 'react'
+import { PuzzleBoard, PuzzleLimit } from '../models/models'
 import { calculatePuzzle, testCalculate } from '../services/puzzleCalculator'
 import { clearBoard, drawPuzzleBoard } from '../services/puzzlePainter'
 import { createPuzzleBoard, getAllPuzzles, PuzzleData } from '../services/puzzleService'
@@ -13,8 +14,22 @@ export interface IHomeProps {
   puzzleData: PuzzleData[];
 }
 
+const defaultLimit = {
+  limits: {
+    atk: undefined,
+    hp: undefined,
+    eva: undefined,
+    acc: undefined,
+    def: undefined,
+    res: undefined,
+    crit: undefined
+  },
+  order: ["atk", "hp", "eva", "acc", "def", "res", "crit"]
+}
+
 const Home: NextPage<IHomeProps> = (props: IHomeProps) => {
   const [puzzle, setPuzzle] = useState<string>("");
+  const [puzzleLimit, setPuzzleLimit] = useState<PuzzleLimit>(defaultLimit);
 
   const calculate = () => {
     var canvas = document.getElementById('mycanvas') as HTMLCanvasElement;
@@ -31,12 +46,17 @@ const Home: NextPage<IHomeProps> = (props: IHomeProps) => {
         const newBoard = createPuzzleBoard(puzzleData);
 
         const currentCoordinates = newBoard.boardDatas[0][0].coordinates;
-        const updatedBoard = calculatePuzzle(currentCoordinates, newBoard)
+        const updatedBoard = calculatePuzzle(currentCoordinates, newBoard, puzzleLimit)
         drawPuzzleBoard(updatedBoard, ctx);
       }
     } else {
       alert('You need Safari or Firefox 1.5+ to see this demo.');
     }
+  }
+
+  const reset = () => {
+    setPuzzle("");
+    setPuzzleLimit(defaultLimit);
   }
 
   const handleChange = (event: SelectChangeEvent<string>) => {
@@ -61,6 +81,27 @@ const Home: NextPage<IHomeProps> = (props: IHomeProps) => {
     }
   }
 
+  const handleCounterChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const label = event.target.id;
+    const newPuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit.limits, [label]: parseInt(event.target.value) } }
+    setPuzzleLimit(newPuzzleLimit);
+  }
+
+  const handleOrderChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const label = event.target.id;
+    const currentIndex = puzzleLimit.order.indexOf(label);
+    const newIndex = parseInt(event.target.value);
+
+    const order = [...puzzleLimit.order];
+    order.splice(currentIndex, 1);
+    order.splice(newIndex, 0, label);
+
+    const newPuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit.limits}, order: [...order] }
+    setPuzzleLimit(newPuzzleLimit);
+  }
+
+  const limitKeys = Object.keys(puzzleLimit.limits);
+
   return (
     <ThemeProvider theme={theme}>
       <Head>
@@ -78,51 +119,54 @@ const Home: NextPage<IHomeProps> = (props: IHomeProps) => {
       </AppBar>
 
       <main>
-        <Box
-          sx={{
-            bgcolor: 'background.paper',
-            pt: 8,
-            pb: 6,
-          }}
-        >
-          <Container maxWidth="sm">
+        <Box sx={{ bgcolor: 'background.paper', pt: 8, pb: 6, }}>
+          <Container maxWidth="md" style={{ display: 'flex', flexDirection: 'column', flexGrow: 0 }}>
             <Typography variant="h4" align="center" paragraph>
               Choose a puzzle and press calculate button
             </Typography>
-            <Stack
-              sx={{ pt: 4 }}
-              direction="row"
-              spacing={2}
-              justifyContent="center"
-            >
+            <Stack sx={{ pt: 4 }} direction="row" spacing={2} justifyContent="center">
               <FormControl sx={{ m: 1, minWidth: 120 }}>
-                <InputLabel id="demo-simple-select-helper-label">Puzzle</InputLabel>
-                <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
-                  value={puzzle}
-                  label="Puzzle"
-                  onChange={handleChange}
-                >
+                <InputLabel id="puzzleSelect">Puzzle</InputLabel>
+                <Select size="small" labelId="puzzleSelect" id="puzzleSelect" value={puzzle} label="Puzzle" onChange={handleChange}>
                   {props.puzzleData.map(p => {
                     return (<MenuItem key={p.name} value={p.name}>{p.name}</MenuItem>)
                   })}
                 </Select>
               </FormControl>
 
-              <Button onClick={calculate} variant="contained">Calculate</Button>
+              <Button size="small" onClick={calculate} variant="contained">Calculate</Button>
+              <Button size="small" onClick={reset} color="secondary" variant='outlined'>Reset</Button>
             </Stack>
 
-            <canvas id="mycanvas" width="450" height="450" style={{ border: '1px solid black', marginBottom: 5, marginTop: 10 }}></canvas>
+            <Grid alignItems="center" style={{ display: 'flex', margin: '0 auto', flexDirection: 'column' }}>
+
+              <Grid item md={12}>
+                <canvas id="mycanvas" width="450" height="450" style={{ border: '1px solid black', marginBottom: 5, marginTop: 10 }}></canvas>
+              </Grid>
+
+              <Grid md={12} item style={{ display: 'flex', paddingTop: 20 }} alignContent='center'>
+                {
+                  limitKeys.map(limit => {
+                    return (
+                      <Grid item md={1} key={limit.toUpperCase()}>
+                        <img src={`${limit}.svg`} width="70"></img>
+                        <TextField id={limit} label={limit.toUpperCase()} type="number" onChange={handleCounterChange} size="small"
+                          inputProps={{ inputMode: 'numeric', min: 0 }} InputLabelProps={{ shrink: true }} value={puzzleLimit.limits[limit]} />
+
+                        <TextField id={limit} label="Order" type="number" onChange={handleOrderChange} size="small" sx={{mt: 3}}
+                          inputProps={{ inputMode: 'numeric', min: 0, max: 6 }} InputLabelProps={{ shrink: true }} value={puzzleLimit.order.indexOf(limit)} />
+                      </Grid>
+                    )
+                  })
+                }
+              </Grid>
+
+            </Grid>
+
           </Container>
         </Box>
 
-        <div style={{ margin: 15, display: 'flex', flexDirection: 'column' }}>
-
-        </div>
       </main>
-
-
     </ThemeProvider>
   )
 }

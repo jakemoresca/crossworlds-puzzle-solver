@@ -1,13 +1,13 @@
-import { BoardData, PuzzleBoard, PuzzleCoordinates, PuzzleShape, PuzzleType } from "../models/models";
+import { BoardData, PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
 import { PuzzleShapeServiceFactory } from "./shapeServices/puzzleShapeServiceFactory";
 
 const puzzleShapeServiceFactory = new PuzzleShapeServiceFactory();
 
 function boardToString(board: PuzzleBoard): string {
     let boardString = "";
-    
-    for(let y = 0; y < board.height; y++) {
-        for(let x = 0; x < board.width; x++) {
+
+    for (let y = 0; y < board.height; y++) {
+        for (let x = 0; x < board.width; x++) {
             const boardData = board.boardDatas[y][x];
             boardString += boardData.toString(boardData);
         }
@@ -22,9 +22,9 @@ function boardDataToString(boardData: BoardData): string {
 
 function printBoard(board: PuzzleBoard): string {
     let boardString = "\n";
-    
-    for(let y = 0; y < board.height; y++) {
-        for(let x = 0; x < board.width; x++) {
+
+    for (let y = 0; y < board.height; y++) {
+        for (let x = 0; x < board.width; x++) {
             const boardData = board.boardDatas[y][x];
             boardString += `| ${boardData.placeable == false ? 'x' : boardData.shape?.type ?? '-'} |`;
         }
@@ -38,14 +38,14 @@ function printBoard(board: PuzzleBoard): string {
 }
 
 export function testCalculate(): PuzzleBoard {
-    
+
     let boardDatas: BoardData[][] = [];
 
-    for(let y = 0; y < 4; y++) {
-        for(let x = 0; x < 5; x++) {
+    for (let y = 0; y < 4; y++) {
+        for (let x = 0; x < 5; x++) {
             const boardData: BoardData = { placeable: true, coordinates: { row: y, column: x }, toString: boardDataToString };
-            
-            if(!boardDatas[y])
+
+            if (!boardDatas[y])
                 boardDatas[y] = [];
 
             boardDatas[y][x] = boardData;
@@ -56,14 +56,14 @@ export function testCalculate(): PuzzleBoard {
     boardDatas[1][3].placeable = false;
     boardDatas[3][3].placeable = false;
     boardDatas[3][4].placeable = false;
-    
+
     const board: PuzzleBoard = {
         width: 5,
         height: 4,
         boardDatas: boardDatas,
         toString: boardToString
     };
-    
+
     console.log(printBoard(board));
 
     const currentCoordinates = board.boardDatas[0][0].coordinates;
@@ -74,33 +74,40 @@ export function testCalculate(): PuzzleBoard {
     //return printBoard(calculatedBoard);
 }
 
-export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard): PuzzleBoard {
-    var newBoard = {...board};
+export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard, puzzleLimit?: PuzzleLimit): PuzzleBoard {
+    var newBoard = { ...board };
+    var newPuzzleLimit: PuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit?.limits }, order: [...puzzleLimit?.order ?? [] ] }
 
     const boardData = board.boardDatas[currentCoordinates.row][currentCoordinates.column];
-    if(currentCoordinates.column == 0 && currentCoordinates.row == 0 && !boardData.placeable) {
+    if (currentCoordinates.column == 0 && currentCoordinates.row == 0 && !boardData.placeable) {
         const nearestNeighbor = checkNearestNeighbor(currentCoordinates, newBoard);
-        newBoard = calculatePuzzle(nearestNeighbor, newBoard);
+        newBoard = calculatePuzzle(nearestNeighbor, newBoard, newPuzzleLimit);
 
         return newBoard;
     }
 
-    for(let shapeCounter = 0; shapeCounter <= 6; shapeCounter++)
-    {
-        const currentShape = getNextShape(shapeCounter);
-        const puzzleShapeService = puzzleShapeServiceFactory.getShapeService(currentShape);
+    for (let shapeCounter = 0; shapeCounter <= 6; shapeCounter++) {
+        const currentShape = getNextShape(shapeCounter, newPuzzleLimit.order);
+        const limit = newPuzzleLimit ? getLimit(newPuzzleLimit, currentShape) : 100;
 
+        console.log(`limit for ${currentShape} is: ${limit}`)
+
+        if (limit == 0) {
+            continue;
+        }
+
+        const puzzleShapeService = puzzleShapeServiceFactory.getShapeService(currentShape);
         const placeableCoordinates = puzzleShapeService.getPlaceableCoordinates(currentCoordinates, newBoard);
 
-        for(let x = 0; x < placeableCoordinates.length; x++)
-        {
+        for (let x = 0; x < placeableCoordinates.length; x++) {
             var coordinates = [placeableCoordinates[x].coordinates].concat(placeableCoordinates[x].shape?.linkedPuzzles ?? []);
 
-            if(coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
+            if (coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
                 continue;
             }
             else {
                 newBoard = placeShape(coordinates, currentShape, newBoard);
+                setLimit(currentShape, -1, newPuzzleLimit);
 
                 console.log(`after placing:`)
                 console.log(printBoard(newBoard));
@@ -109,15 +116,15 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
 
                 console.log(`nearest neighbor is: x: ${nearestNeighbor.column}, y: ${nearestNeighbor.row}`)
 
-                if(nearestNeighbor.column == -1 && nearestNeighbor.row == -1) {
+                if (nearestNeighbor.column == -1 && nearestNeighbor.row == -1) {
                     console.log(`returning... no changes needed.`);
                     newBoard.finished = true;
                     return newBoard;
                 }
 
-                const updatedBoard = calculatePuzzle(nearestNeighbor, newBoard);
+                const updatedBoard = calculatePuzzle(nearestNeighbor, newBoard, newPuzzleLimit);
 
-                if(updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard) && !updatedBoard.finished) {
+                if (updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard) && !updatedBoard.finished) {
                     console.log(`board was not changed.`)
 
                     console.log(`before:`)
@@ -127,6 +134,7 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
                     console.log(printBoard(updatedBoard));
 
                     newBoard = removeShape(coordinates, updatedBoard);
+                    setLimit(currentShape, 1, newPuzzleLimit);
                 }
                 else {
                     console.log(`board was changed.`)
@@ -144,41 +152,116 @@ function checkNearestNeighbor(currentCoordinates: PuzzleCoordinates, board: Puzz
         const startingColumn = y == currentCoordinates.row ? currentCoordinates.column : 0;
 
         for (let x = startingColumn; x < board.width; x++) {
-            const currentCoordinates: PuzzleCoordinates = {row: y, column: x};
-            
-            if(checkIfPlaceable(currentCoordinates, board)) {
+            const currentCoordinates: PuzzleCoordinates = { row: y, column: x };
+
+            if (checkIfPlaceable(currentCoordinates, board)) {
                 return currentCoordinates;
             }
         }
     }
 
-    return {row: -1, column: -1};
+    return { row: -1, column: -1 };
 }
 
 function checkIfPlaceable(coordinates: PuzzleCoordinates, board: PuzzleBoard): boolean {
     //console.log(`checking if placeable x: ${coordinates.column}, y: ${coordinates.row}`)
 
-    if(coordinates.column < 0 || coordinates.column >= board.width || coordinates.row < 0 || coordinates.row >= board.height)
+    if (coordinates.column < 0 || coordinates.column >= board.width || coordinates.row < 0 || coordinates.row >= board.height)
         return false;
 
     const boardData = board.boardDatas[coordinates.row][coordinates.column];
     return boardData.placeable && !boardData.shape;
 }
 
-function getNextShape(counter: number)
-{
+function getNextShape(counter: number, order: string[]) {
     const shapeCounters: { [key: number]: PuzzleType } = {
-        0: PuzzleType.OShape, 1: PuzzleType.TShape, 
-        2: PuzzleType.LShape, 3: PuzzleType.JShape, 
-        4: PuzzleType.IShape, 5: PuzzleType.SShape, 
-        6: PuzzleType.ZShape
+        0: PuzzleType.OShape, //atk
+        1: PuzzleType.TShape, //hp
+        2: PuzzleType.LShape, //eva
+        3: PuzzleType.JShape, //acc
+        4: PuzzleType.IShape, //def
+        5: PuzzleType.SShape, //res
+        6: PuzzleType.ZShape  //crit
     };
+
+    if (order.length > 0) {
+        const puzzleString = order[counter];
+
+        switch (puzzleString) {
+            case "atk":
+                return shapeCounters[0];
+            case "hp":
+                return shapeCounters[1];
+            case "eva":
+                return shapeCounters[2];
+            case "acc":
+                return shapeCounters[3];
+            case "def":
+                return shapeCounters[4];
+            case "res":
+                return shapeCounters[5];
+            case "crit":
+                return shapeCounters[6];
+        }
+    }
 
     return shapeCounters[counter];
 }
 
+function getLimit(puzzleLimit: PuzzleLimit, puzzleType: PuzzleType) {
+    switch (puzzleType) {
+        case PuzzleType.OShape: //atk
+            return puzzleLimit.limits['atk'] ?? 100;
+        case PuzzleType.TShape: //hp
+            return puzzleLimit.limits['hp'] ?? 100;
+        case PuzzleType.LShape: //eva
+            return puzzleLimit.limits['eva'] ?? 100;
+        case PuzzleType.JShape: //acc
+            return puzzleLimit.limits['acc'] ?? 100;
+        case PuzzleType.IShape: //def
+            return puzzleLimit.limits['def'] ?? 100;
+        case PuzzleType.SShape: //res
+            return puzzleLimit.limits['res'] ?? 100;
+        case PuzzleType.ZShape: //crit
+            return puzzleLimit.limits['crit'] ?? 100;
+        default:
+            return 100;
+    }
+}
+
+function setLimit(puzzleType: PuzzleType, amount: number, puzzleLimit?: PuzzleLimit): PuzzleLimit | undefined {
+    if (!puzzleLimit)
+        return puzzleLimit;
+
+    switch (puzzleType) {
+        case PuzzleType.OShape: //atk
+            puzzleLimit.limits['atk'] = puzzleLimit.limits['atk'] ? puzzleLimit.limits['atk'] + amount : undefined;
+            break;
+        case PuzzleType.TShape: //hp
+            puzzleLimit.limits['hp'] = puzzleLimit.limits['hp'] ? puzzleLimit.limits['hp'] + amount : undefined;
+            break;
+        case PuzzleType.LShape: //eva
+            puzzleLimit.limits['eva'] = puzzleLimit.limits['eva'] ? puzzleLimit.limits['eva'] + amount : undefined;
+            break;
+        case PuzzleType.JShape: //acc
+            puzzleLimit.limits['acc'] = puzzleLimit.limits['acc'] ? puzzleLimit.limits['acc'] + amount : undefined;
+            break;
+        case PuzzleType.IShape: //def
+            puzzleLimit.limits['def'] = puzzleLimit.limits['def'] ? puzzleLimit.limits['def'] + amount : undefined;
+            break;
+        case PuzzleType.SShape: //res
+            puzzleLimit.limits['res'] = puzzleLimit.limits['res'] ? puzzleLimit.limits['res'] + amount : undefined;
+            break;
+        case PuzzleType.ZShape: //crit
+            puzzleLimit.limits['crit'] = puzzleLimit.limits['crit'] ? puzzleLimit.limits['crit'] + amount : undefined;
+            break;
+    }
+
+    return puzzleLimit;
+}
+
 function placeShape(coordinates: PuzzleCoordinates[], puzzleType: PuzzleType, board: PuzzleBoard) {
-    const newBoard = {...board};
+    const newBoard = { ...board };
 
     coordinates.forEach(x => {
         const puzzleShape: PuzzleShape = { type: puzzleType, linkedPuzzles: coordinates }; //coordinates.filter(y => y.column != x.column && y.row != x.row) };
@@ -189,7 +272,7 @@ function placeShape(coordinates: PuzzleCoordinates[], puzzleType: PuzzleType, bo
 }
 
 function removeShape(coordinates: PuzzleCoordinates[], board: PuzzleBoard) {
-    const newBoard = {...board};
+    const newBoard = { ...board };
 
     coordinates.forEach(x => {
         newBoard.boardDatas[x.row][x.column].shape = undefined
