@@ -1,34 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Ni no Kuni: Cross Worlds Puzzle Solver
 
-## Getting Started
+Puzzle solver made for Ni no Kuni: Cross Worlds. (https://ninokuni.netmarble.com/en)
+To access the tool visit this link: (https://crossworlds-solver.rydersir.es/)
 
-First, run the development server:
+## How to use
+1. Visit the tool here: (https://crossworlds-solver.rydersir.es/)
+2. Select puzzle.
+3. **Optional**: add restriction to a puzzle piece by providing a number on the figure. 0 means none. blank means  unlimited.
+4. Click on calculate button. Depending on the puzzle, it may take some time. Once done it should show the solution on the canvas. 
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Puzzle Limitation** - add restriction to use only a number of puzzle pieces. e.g use only 1 O-Shape or not use L Shape.
+2. **Puzzle Prioritization** - prioritize puzzle pieces by setting order from 0 to 6. with 0 means the first priority.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Roadmap
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+1. **Puzzle customization** - capability to add/import your own puzzle templates.
+2. **Puzzle solutions** - show a list of possible solutions for a given limitation.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Preview
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[![Preview](https://raw.githubusercontent.com/jakemoresca/crossworlds-puzzle-solver/main/preview.png "Preview")](https://raw.githubusercontent.com/jakemoresca/crossworlds-puzzle-solver/main/preview.png "Preview")
