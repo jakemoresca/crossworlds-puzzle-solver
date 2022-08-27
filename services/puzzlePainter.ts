@@ -39,10 +39,46 @@ function drawBlock(linkedCoordinates: PuzzleCoordinates[], ctx: CanvasRenderingC
         ctx.fillStyle = linkedColor;
         ctx.fillRect(coordinates.column * 50, coordinates.row * 50, 50, 50);
 
+        drawCellBorder(coordinates, linkedCoordinates, ctx);
+
         board.boardDatas[coordinates.row][coordinates.column].drawn = true;
     });
 
     return board;
+}
+
+function drawCellBorder(coordinates: PuzzleCoordinates, linkedCoordinates: PuzzleCoordinates[],  ctx: CanvasRenderingContext2D) {
+    //left
+    if(!linkedCoordinates.some(x => x.row == coordinates.row && x.column == coordinates.column - 1)) {
+        ctx.beginPath();
+        ctx.moveTo(coordinates.column * 50, coordinates.row * 50);
+        ctx.lineTo(coordinates.column * 50, (coordinates.row + 1) * 50);
+        ctx.stroke();
+    }
+
+    //top
+    if(!linkedCoordinates.some(x => x.row == coordinates.row - 1 && x.column == coordinates.column)) { 
+        ctx.beginPath();
+        ctx.moveTo(coordinates.column * 50, coordinates.row * 50);
+        ctx.lineTo((coordinates.column + 1) * 50, coordinates.row * 50);
+        ctx.stroke();
+    }
+
+    //right
+    if(!linkedCoordinates.some(x => x.row == coordinates.row && x.column == coordinates.column + 1)) {
+        ctx.beginPath();
+        ctx.moveTo((coordinates.column + 1) * 50, coordinates.row * 50);
+        ctx.lineTo((coordinates.column + 1) * 50, (coordinates.row + 1) * 50);
+        ctx.stroke();
+    }
+
+    //down
+    if(!linkedCoordinates.some(x => x.row == coordinates.row + 1 && x.column == coordinates.column)) {
+        ctx.beginPath();
+        ctx.moveTo(coordinates.column * 50, (coordinates.row + 1) * 50);
+        ctx.lineTo((coordinates.column + 1) * 50, (coordinates.row + 1) * 50);
+        ctx.stroke();
+    }
 }
 
 function drawCellGrid(coordinates: PuzzleCoordinates, ctx: CanvasRenderingContext2D, board: PuzzleBoard) {
