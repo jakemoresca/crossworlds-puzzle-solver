@@ -1,24 +1,7 @@
-import { BoardData, PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
+import { PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
 import { PuzzleShapeServiceFactory } from "./shapeServices/puzzleShapeServiceFactory";
 
 const puzzleShapeServiceFactory = new PuzzleShapeServiceFactory();
-
-function boardToString(board: PuzzleBoard): string {
-    let boardString = "";
-
-    for (let y = 0; y < board.height; y++) {
-        for (let x = 0; x < board.width; x++) {
-            const boardData = board.boardDatas[y][x];
-            boardString += boardData.toString(boardData);
-        }
-    }
-
-    return boardString;
-}
-
-function boardDataToString(boardData: BoardData): string {
-    return `{x:${boardData.coordinates.column},y:${boardData.coordinates.row},s:${boardData.shape ?? '-'}}`;
-}
 
 function printBoard(board: PuzzleBoard): string {
     let boardString = "\n";
@@ -35,43 +18,6 @@ function printBoard(board: PuzzleBoard): string {
     boardString += "\n";
 
     return boardString;
-}
-
-export function testCalculate(): PuzzleBoard {
-
-    let boardDatas: BoardData[][] = [];
-
-    for (let y = 0; y < 4; y++) {
-        for (let x = 0; x < 5; x++) {
-            const boardData: BoardData = { placeable: true, coordinates: { row: y, column: x }, toString: boardDataToString };
-
-            if (!boardDatas[y])
-                boardDatas[y] = [];
-
-            boardDatas[y][x] = boardData;
-        }
-    }
-
-    boardDatas[0][3].placeable = false;
-    boardDatas[1][3].placeable = false;
-    boardDatas[3][3].placeable = false;
-    boardDatas[3][4].placeable = false;
-
-    const board: PuzzleBoard = {
-        width: 5,
-        height: 4,
-        boardDatas: boardDatas,
-        toString: boardToString
-    };
-
-    console.log(printBoard(board));
-
-    const currentCoordinates = board.boardDatas[0][0].coordinates;
-    const calculatedBoard = calculatePuzzle(currentCoordinates, board);
-
-    return calculatedBoard;
-
-    //return printBoard(calculatedBoard);
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard, puzzleLimit?: PuzzleLimit): PuzzleBoard {
@@ -164,8 +110,6 @@ function checkNearestNeighbor(currentCoordinates: PuzzleCoordinates, board: Puzz
 }
 
 function checkIfPlaceable(coordinates: PuzzleCoordinates, board: PuzzleBoard): boolean {
-    //console.log(`checking if placeable x: ${coordinates.column}, y: ${coordinates.row}`)
-
     if (coordinates.column < 0 || coordinates.column >= board.width || coordinates.row < 0 || coordinates.row >= board.height)
         return false;
 
@@ -264,7 +208,7 @@ function placeShape(coordinates: PuzzleCoordinates[], puzzleType: PuzzleType, bo
     const newBoard = { ...board };
 
     coordinates.forEach(x => {
-        const puzzleShape: PuzzleShape = { type: puzzleType, linkedPuzzles: coordinates }; //coordinates.filter(y => y.column != x.column && y.row != x.row) };
+        const puzzleShape: PuzzleShape = { type: puzzleType, linkedPuzzles: coordinates };
         newBoard.boardDatas[x.row][x.column].shape = puzzleShape;
     });
 

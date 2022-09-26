@@ -2,9 +2,9 @@ import { AppBar, Box, Button, Container, createTheme, CssBaseline, FormControl, 
 import { url } from 'inspector'
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { PuzzleBoard, PuzzleLimit } from '../models/models'
-import { calculatePuzzle, testCalculate } from '../services/puzzleCalculator'
+import { ChangeEvent, useState } from 'react'
+import { PuzzleLimit } from '../models/models'
+import { calculatePuzzle } from '../services/puzzleCalculator'
 import { clearBoard, drawPuzzleBoard } from '../services/puzzlePainter'
 import { createPuzzleBoard, getAllPuzzles, PuzzleData } from '../services/puzzleService'
 
