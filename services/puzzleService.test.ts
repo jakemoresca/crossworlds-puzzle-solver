@@ -1,5 +1,5 @@
 import { BoardData } from "../models/models";
-import { boardDataToString, createPuzzleBoard, PuzzleData } from "./puzzleService";
+import { boardDataToString, createPuzzleBoard, getAllPuzzles, PuzzleData } from "./puzzleService";
 
 test('Should return proper board data string with a shape', () => {
   const boardData: BoardData = {
@@ -33,3 +33,9 @@ test('Should return proper board data string from a puzzle data', () => {
   expect(board.width).toBe(4);
   expect(boardString).toBe(`{x:0,y:0,s:-}{x:1,y:0,s:-}{x:2,y:0,s:-}{x:3,y:0,s:-}{x:0,y:1,s:-}{x:1,y:1,s:-}{x:2,y:1,s:-}{x:3,y:1,s:-}`)
 });
+
+test('Should get and return puzzle.json', async () => {
+  const puzzles = await import("../puzzles/puzzles.json");
+  
+  expect(await getAllPuzzles()).toBe(puzzles.default);
+})
