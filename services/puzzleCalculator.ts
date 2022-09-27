@@ -23,8 +23,8 @@ function printBoard(board: PuzzleBoard): string {
 }
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard, puzzleLimit?: PuzzleLimit): PuzzleBoard {
-    var newBoard = { ...board };
-    var newPuzzleLimit: PuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit?.limits }, order: [...puzzleLimit?.order ?? [] ] }
+    let newBoard = { ...board };
+    let newPuzzleLimit: PuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit?.limits }, order: [...puzzleLimit?.order ?? [] ] }
 
     const boardData = board.boardDatas[currentCoordinates.row][currentCoordinates.column];
     if (currentCoordinates.column == 0 && currentCoordinates.row == 0 && !boardData.placeable) {
@@ -48,7 +48,7 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
         const placeableCoordinates = puzzleShapeService.getPlaceableCoordinates(currentCoordinates, newBoard);
 
         for (let x = 0; x < placeableCoordinates.length; x++) {
-            var coordinates = [placeableCoordinates[x].coordinates].concat(placeableCoordinates[x].shape?.linkedPuzzles ?? []);
+            const coordinates = [placeableCoordinates[x].coordinates].concat(placeableCoordinates[x].shape?.linkedPuzzles ?? []);
 
             if (coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
                 continue;
