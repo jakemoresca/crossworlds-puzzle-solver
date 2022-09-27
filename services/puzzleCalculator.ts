@@ -181,8 +181,6 @@ function getLimit(puzzleLimit: PuzzleLimit, puzzleType: PuzzleType) {
             return puzzleLimit.limits['res'] ?? 100;
         case PuzzleType.ZShape: //crit
             return puzzleLimit.limits['crit'] ?? 100;
-        default:
-            return 100;
     }
 }
 
