@@ -1,4 +1,6 @@
-# Ni no Kuni: Cross Worlds Puzzle Solver
+# Ni no Kuni: Cross Worlds Puzzle Solver 
+
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=jakemoresca_crossworlds-puzzle-solver)](https://sonarcloud.io/summary/new_code?id=jakemoresca_crossworlds-puzzle-solver)
 
 Puzzle solver made for Ni no Kuni: Cross Worlds. (https://ninokuni.netmarble.com/en)
 To access the tool visit this link: (https://crossworlds-solver.rydersir.es/)
