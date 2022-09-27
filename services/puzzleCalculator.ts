@@ -1,7 +1,9 @@
 import { PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
 import { PuzzleShapeServiceFactory } from "./shapeServices/puzzleShapeServiceFactory";
+import { SolutionService } from "./solutionsService";
 
 const puzzleShapeServiceFactory = new PuzzleShapeServiceFactory();
+const solutionsService = new SolutionService();
 
 function printBoard(board: PuzzleBoard): string {
     let boardString = "\n";

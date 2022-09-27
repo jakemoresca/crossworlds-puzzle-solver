@@ -34,7 +34,7 @@ export function createPuzzleBoard(puzzleData: PuzzleData): PuzzleBoard {
     return board;
 }
 
-function boardToString(board: PuzzleBoard): string {
+export function boardToString(board: PuzzleBoard): string {
     let boardString = "";
     
     for(let y = 0; y < board.height; y++) {
@@ -47,8 +47,8 @@ function boardToString(board: PuzzleBoard): string {
     return boardString;
 }
 
-function boardDataToString(boardData: BoardData): string {
-    return `{x:${boardData.coordinates.column},y:${boardData.coordinates.row},s:${boardData.shape ?? '-'}}`;
+export function boardDataToString(boardData: BoardData): string {
+    return `{x:${boardData.coordinates.column},y:${boardData.coordinates.row},s:${boardData.shape?.type ?? '-'}}`;
 }
 
 export interface PuzzleData {

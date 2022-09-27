@@ -1,30 +1,35 @@
 import { PuzzleBoard } from "../models/models";
 
-let solutions: PuzzleBoard[] = [];
+let solutions: PuzzleBoard[];
+export class SolutionService {
 
-export function getAllSolutions() {
-    return solutions;
-}
+    constructor() {
+        solutions = [];
+    }
 
-export function addSolution(puzzleBoard: PuzzleBoard) {
+    getAllSolutions() {
+        return solutions;
+    }
 
-    if(containsSolution(puzzleBoard))
-        return;
+    addSolution(puzzleBoard: PuzzleBoard) {
+        if (this.containsSolution(puzzleBoard))
+            return;
 
-    solutions = solutions.concat([puzzleBoard]);
-}
+        solutions = solutions.concat([puzzleBoard]);
+    }
 
-export function deleteSolution(puzzleBoard: PuzzleBoard) {
-    if(!containsSolution(puzzleBoard))
-        return;
+    deleteSolution(puzzleBoard: PuzzleBoard) {
+        if (!this.containsSolution(puzzleBoard))
+            return;
 
-    solutions = solutions.filter(x => x.toString(x) != puzzleBoard.toString(puzzleBoard));
-}
+        solutions = solutions.filter(x => x.toString(x) != puzzleBoard.toString(puzzleBoard));
+    }
 
-export function clearSolutions() {
-    solutions = [];
-}
+    clearSolutions() {
+        solutions = [];
+    }
 
-export function containsSolution(puzzleBoard: PuzzleBoard): boolean {
-    return solutions.some(x => x.toString(x) == puzzleBoard.toString(puzzleBoard));
+    containsSolution(puzzleBoard: PuzzleBoard): boolean {
+        return solutions.some(x => x.toString(x) == puzzleBoard.toString(puzzleBoard));
+    }
 }
