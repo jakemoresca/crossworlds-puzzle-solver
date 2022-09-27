@@ -1,4 +1,4 @@
-import { PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
+import { BoardData, PuzzleBoard, PuzzleCoordinates, PuzzleLimit, PuzzleShape, PuzzleType } from "../models/models";
 import { PuzzleShapeServiceFactory } from "./shapeServices/puzzleShapeServiceFactory";
 import { SolutionService } from "./solutionsService";
 
@@ -47,47 +47,59 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
         const puzzleShapeService = puzzleShapeServiceFactory.getShapeService(currentShape);
         const placeableCoordinates = puzzleShapeService.getPlaceableCoordinates(currentCoordinates, newBoard);
 
-        for (let x = 0; x < placeableCoordinates.length; x++) {
-            const coordinates = [placeableCoordinates[x].coordinates].concat(placeableCoordinates[x].shape?.linkedPuzzles ?? []);
+        newBoard = calculatePlaceableCoordinates(placeableCoordinates, newBoard, currentShape, newPuzzleLimit);
 
-            if (coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
-                continue;
+        if(newBoard.finished)
+            break;
+    }
+
+    return newBoard;
+}
+
+function calculatePlaceableCoordinates(placeableCoordinates: BoardData[], board: PuzzleBoard, currentShape: PuzzleType, puzzleLimit: PuzzleLimit)
+{
+    let newBoard = { ...board };
+
+    for(let currentPlaceableCoordinates of placeableCoordinates) {
+        const coordinates = [currentPlaceableCoordinates.coordinates].concat(currentPlaceableCoordinates.shape?.linkedPuzzles ?? []);
+
+        if (coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
+            continue;
+        }
+        else {
+            newBoard = placeShape(coordinates, currentShape, newBoard);
+            setLimit(currentShape, -1, puzzleLimit);
+
+            console.log(`after placing:`)
+            console.log(printBoard(newBoard));
+
+            const nearestNeighbor = checkNearestNeighbor(placeableCoordinates[0].coordinates, newBoard);
+
+            console.log(`nearest neighbor is: x: ${nearestNeighbor.column}, y: ${nearestNeighbor.row}`)
+
+            if (nearestNeighbor.column == -1 && nearestNeighbor.row == -1) {
+                console.log(`returning... no changes needed.`);
+                newBoard.finished = true;
+                return newBoard;
             }
-            else {
-                newBoard = placeShape(coordinates, currentShape, newBoard);
-                setLimit(currentShape, -1, newPuzzleLimit);
 
-                console.log(`after placing:`)
+            const updatedBoard = calculatePuzzle(nearestNeighbor, newBoard, puzzleLimit);
+
+            if (updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard) && !updatedBoard.finished) {
+                console.log(`board was not changed.`)
+
+                console.log(`before:`)
                 console.log(printBoard(newBoard));
 
-                const nearestNeighbor = checkNearestNeighbor(placeableCoordinates[0].coordinates, newBoard);
+                console.log(`after:`)
+                console.log(printBoard(updatedBoard));
 
-                console.log(`nearest neighbor is: x: ${nearestNeighbor.column}, y: ${nearestNeighbor.row}`)
-
-                if (nearestNeighbor.column == -1 && nearestNeighbor.row == -1) {
-                    console.log(`returning... no changes needed.`);
-                    newBoard.finished = true;
-                    return newBoard;
-                }
-
-                const updatedBoard = calculatePuzzle(nearestNeighbor, newBoard, newPuzzleLimit);
-
-                if (updatedBoard.toString(updatedBoard) == newBoard.toString(newBoard) && !updatedBoard.finished) {
-                    console.log(`board was not changed.`)
-
-                    console.log(`before:`)
-                    console.log(printBoard(newBoard));
-
-                    console.log(`after:`)
-                    console.log(printBoard(updatedBoard));
-
-                    newBoard = removeShape(coordinates, updatedBoard);
-                    setLimit(currentShape, 1, newPuzzleLimit);
-                }
-                else {
-                    console.log(`board was changed.`)
-                    return updatedBoard;
-                }
+                newBoard = removeShape(coordinates, updatedBoard);
+                setLimit(currentShape, 1, puzzleLimit);
+            }
+            else {
+                console.log(`board was changed.`)
+                return updatedBoard;
             }
         }
     }
