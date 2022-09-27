@@ -24,7 +24,7 @@ function printBoard(board: PuzzleBoard): string {
 
 export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: PuzzleBoard, puzzleLimit?: PuzzleLimit): PuzzleBoard {
     let newBoard = { ...board };
-    let newPuzzleLimit: PuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit?.limits }, order: [...puzzleLimit?.order ?? [] ] }
+    let newPuzzleLimit: PuzzleLimit = { ...puzzleLimit, limits: { ...puzzleLimit?.limits }, order: [...puzzleLimit?.order ?? []] }
 
     const boardData = board.boardDatas[currentCoordinates.row][currentCoordinates.column];
     if (currentCoordinates.column == 0 && currentCoordinates.row == 0 && !boardData.placeable) {
@@ -49,18 +49,17 @@ export function calculatePuzzle(currentCoordinates: PuzzleCoordinates, board: Pu
 
         newBoard = calculatePlaceableCoordinates(placeableCoordinates, newBoard, currentShape, newPuzzleLimit);
 
-        if(newBoard.finished)
+        if (newBoard.finished)
             break;
     }
 
     return newBoard;
 }
 
-function calculatePlaceableCoordinates(placeableCoordinates: BoardData[], board: PuzzleBoard, currentShape: PuzzleType, puzzleLimit: PuzzleLimit)
-{
+function calculatePlaceableCoordinates(placeableCoordinates: BoardData[], board: PuzzleBoard, currentShape: PuzzleType, puzzleLimit: PuzzleLimit) {
     let newBoard = { ...board };
 
-    for(let currentPlaceableCoordinates of placeableCoordinates) {
+    for (let currentPlaceableCoordinates of placeableCoordinates) {
         const coordinates = [currentPlaceableCoordinates.coordinates].concat(currentPlaceableCoordinates.shape?.linkedPuzzles ?? []);
 
         if (coordinates.some(x => !checkIfPlaceable(x, newBoard))) {
@@ -191,29 +190,33 @@ function setLimit(puzzleType: PuzzleType, amount: number, puzzleLimit?: PuzzleLi
     if (!puzzleLimit)
         return puzzleLimit;
 
+    let limitName = "";
+
     switch (puzzleType) {
         case PuzzleType.OShape: //atk
-            puzzleLimit.limits['atk'] = puzzleLimit.limits['atk'] ? puzzleLimit.limits['atk'] + amount : undefined;
+            limitName = "atk";
             break;
         case PuzzleType.TShape: //hp
-            puzzleLimit.limits['hp'] = puzzleLimit.limits['hp'] ? puzzleLimit.limits['hp'] + amount : undefined;
+            limitName = "hp";
             break;
         case PuzzleType.LShape: //eva
-            puzzleLimit.limits['eva'] = puzzleLimit.limits['eva'] ? puzzleLimit.limits['eva'] + amount : undefined;
+            limitName = "eva";
             break;
         case PuzzleType.JShape: //acc
-            puzzleLimit.limits['acc'] = puzzleLimit.limits['acc'] ? puzzleLimit.limits['acc'] + amount : undefined;
+            limitName = "acc";
             break;
         case PuzzleType.IShape: //def
-            puzzleLimit.limits['def'] = puzzleLimit.limits['def'] ? puzzleLimit.limits['def'] + amount : undefined;
+            limitName = "def";
             break;
         case PuzzleType.SShape: //res
-            puzzleLimit.limits['res'] = puzzleLimit.limits['res'] ? puzzleLimit.limits['res'] + amount : undefined;
+            limitName = "res";
             break;
         case PuzzleType.ZShape: //crit
-            puzzleLimit.limits['crit'] = puzzleLimit.limits['crit'] ? puzzleLimit.limits['crit'] + amount : undefined;
+            limitName = "crit";
             break;
     }
+
+    puzzleLimit.limits[limitName] = puzzleLimit.limits[limitName] ? (puzzleLimit.limits[limitName] ?? 0) + amount : undefined;
 
     return puzzleLimit;
 }
