@@ -130,7 +130,7 @@ function checkIfPlaceable(coordinates: PuzzleCoordinates, board: PuzzleBoard): b
     return boardData.placeable && !boardData.shape;
 }
 
-function getNextShape(counter: number, order: string[]) {
+export function getNextShape(counter: number, order: string[]) {
     const shapeCounters: { [key: number]: PuzzleType } = {
         0: PuzzleType.OShape, //atk
         1: PuzzleType.TShape, //hp
